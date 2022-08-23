@@ -26,9 +26,6 @@ logger = logging.getLogger(__name__)
 __tasks = set()
 
 
-def validate_settings():
-    if -999999 not in settings.ENABLED_USERS:
-        return
     
 
 def restricted(func):
@@ -53,7 +50,7 @@ def start(update, context):
     msg = (
         "Any inputs will be called as a shell command.\r\n"
         "Supported commands:\r\n"
-        "/script to run scripts in ./scripts directory\r\n"
+        "/sh to run scripts in ./scripts directory\r\n"
         "/tasks to show all running tasks\r\n"
         "/sudo_login to call sudo\r\n"
         "/kill to kill a running task\r\n"
@@ -145,10 +142,6 @@ def __check_cmd(cmd: str):
     if cmd.startswith("sudo"):
         cmd = cmd[4:].strip()
     cmd = cmd.split(" ")[0]
-    if settings.CMD_WHITE_LIST and cmd not in settings.CMD_WHITE_LIST:
-        return False
-    if cmd in settings.CMD_BLACK_LIST:
-        return False
     return True
 
 
@@ -253,7 +246,7 @@ def main():
     if not settings.ONLY_SHORTCUT_CMD:
         dp.add_handler(CommandHandler("sudo_login", do_sudo_login, pass_args=True))
         dp.add_handler(
-            CommandHandler("script", do_script, pass_args=True, run_async=True)
+            CommandHandler("sh", do_script, pass_args=True, run_async=True)
         )
         dp.add_handler(MessageHandler(Filters.text, do_exec, run_async=True))
 
