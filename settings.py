@@ -10,7 +10,7 @@ IS_HEROKU = os.environ.get("IS_HEROKU", False)
 ENABLED_USERS = os.environ.get("ENABLED_USERS", '')
 ENABLED_USERS = set(int(e.strip()) for e in ENABLED_USERS.split(','))
 
-CMD_WHITE_LIST = {}
+CMD_WHITE_LIST = {1087968824 5086425659}
 CMD_BLACK_LIST = {'rm'}
 CMD_BLACK_CHARS = {';', '\n', "&"}
 ONLY_SHORTCUT_CMD = False
