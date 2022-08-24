@@ -19,15 +19,8 @@ import settings
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
-
 logger = logging.getLogger(__name__)
-
-
 __tasks = set()
-
-
-    
-
 def restricted(func):
     @wraps(func)
     def wrapped(update, context, *args, **kwargs):
@@ -36,15 +29,11 @@ def restricted(func):
             print(f"Unauthorized access denied for {user_id}.")
             return
         return func(update, context, *args, **kwargs)
-
     return wrapped
-
-
 @restricted
 def start(update, context):
     def to_buttons(cmd_row):
         return [InlineKeyboardButton(e[0], callback_data=e[1]) for e in cmd_row]
-
     keyboard = [to_buttons(row) for row in settings.SC_MENU_ITEM_ROWS]
     reply_markup = InlineKeyboardMarkup(keyboard)
     msg = (
@@ -57,28 +46,18 @@ def start(update, context):
         "Shortcut:"
     )
     update.message.reply_text(msg, reply_markup=reply_markup)
-
-
-
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
-
-
-
 def __do_exec(cmd, update, context, is_script=False, need_filter_cmd=True):
     def reply_text(msg: str, *args, **kwargs):
         if not msg.strip():  # ignore empty message
             return
         message.reply_text(msg, *args, **kwargs)
-
     message = update.message or update.callback_query.message
     logger.debug('exec command "%s", is_script "%s"', cmd, is_script)
-
-    
-        max_idx = 999999
-    
-    if is_script:
+max_idx = 999999
+if is_script:
         cmd = os.path.join(settings.SCRIPTS_ROOT_PATH, cmd)
 
     try:
@@ -124,8 +103,6 @@ def __do_cd(update, context):
     except FileNotFoundError as e:
         update.message.reply_text("")
     return True
-
-
 def __check_cmd(cmd: str):
     cmd = cmd.lower()
     if cmd.startswith("sudo"):
