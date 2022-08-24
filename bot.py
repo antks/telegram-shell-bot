@@ -85,10 +85,7 @@ def __do_exec(cmd, update, context, is_script=False, need_filter_cmd=True):
     if is_out_all:
         max_idx = 999999
 
-    if need_filter_cmd and not __check_cmd_chars(cmd):
-        reply_text("This cmd is illegal.")
-        return
-
+    
     if is_script:
         cmd = os.path.join(settings.SCRIPTS_ROOT_PATH, cmd)
 
