@@ -19,8 +19,14 @@ import settings
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
+
 logger = logging.getLogger(__name__)
+
+
 __tasks = set()
+
+
+
 def restricted(func):
     @wraps(func)
     def wrapped(update, context, *args, **kwargs):
@@ -29,41 +35,65 @@ def restricted(func):
             print(f"Unauthorized access denied for {user_id}.")
             return
         return func(update, context, *args, **kwargs)
+
     return wrapped
+
+
 @restricted
 def start(update, context):
     def to_buttons(cmd_row):
         return [InlineKeyboardButton(e[0], callback_data=e[1]) for e in cmd_row]
+
     keyboard = [to_buttons(row) for row in settings.SC_MENU_ITEM_ROWS]
     reply_markup = InlineKeyboardMarkup(keyboard)
     msg = (
         "Any inputs will be called as a shell command.\r\n"
         "Supported commands:\r\n"
-        "/sh to run scripts in ./scripts directory\r\n"
+        "/script to run scripts in ./scripts directory\r\n"
         "/tasks to show all running tasks\r\n"
         "/sudo_login to call sudo\r\n"
         "/kill to kill a running task\r\n"
         "Shortcut:"
     )
     update.message.reply_text(msg, reply_markup=reply_markup)
+
+
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
+
+
+def __is_out_all(cmd: str) -> (str, bool):
+    param = "oa;"
+    if cmd.startswith(param):
+        return cmd[len(param) :], True
+    return cmd, True
+
+
 def __do_exec(cmd, update, context, is_script=False, need_filter_cmd=True):
     def reply_text(msg: str, *args, **kwargs):
         if not msg.strip():  # ignore empty message
             return
         message.reply_text(msg, *args, **kwargs)
+
     message = update.message or update.callback_query.message
     logger.debug('exec command "%s", is_script "%s"', cmd, is_script)
-max_idx = 999999
-if is_script:
+
+    max_idx = 3
+    cmd, is_out_all = __is_out_all(cmd)
+    if is_out_all:
+        max_idx = 999999
+
+    if need_filter_cmd and not __check_cmd_chars(cmd):
+        reply_text("This cmd is illegal.")
+        return
+
+    if is_script:
         cmd = os.path.join(settings.SCRIPTS_ROOT_PATH, cmd)
 
     try:
         c = delegator.run(cmd, block=False, timeout=1e6)
-    except FileNotFoundError as e:
-        reply_text("")
+    
         return
     out = ""
     task = (f"{c.pid}", cmd, c)
@@ -101,13 +131,19 @@ def __do_cd(update, context):
         os.chdir(cmd[3:])
         update.message.reply_text(f"pwd: {os.getcwd()}")
     except FileNotFoundError as e:
-        update.message.reply_text("")
+        update.message.reply_text(f"{e}")
     return True
+
+
 def __check_cmd(cmd: str):
     cmd = cmd.lower()
     if cmd.startswith("sudo"):
         cmd = cmd[4:].strip()
     cmd = cmd.split(" ")[0]
+    if settings.CMD_WHITE_LIST and cmd not in settings.CMD_WHITE_LIST:
+        return False
+    if cmd in settings.CMD_BLACK_LIST:
+        return False
     return True
 
 
@@ -212,7 +248,7 @@ def main():
     if not settings.ONLY_SHORTCUT_CMD:
         dp.add_handler(CommandHandler("sudo_login", do_sudo_login, pass_args=True))
         dp.add_handler(
-            CommandHandler("sh", do_script, pass_args=True, run_async=True)
+            CommandHandler("script", do_script, pass_args=True, run_async=True)
         )
         dp.add_handler(MessageHandler(Filters.text, do_exec, run_async=True))
 
@@ -233,4 +269,5 @@ def main():
 
 
 if __name__ == "__main__":
+ 
     main()
