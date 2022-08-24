@@ -26,6 +26,16 @@ logger = logging.getLogger(__name__)
 __tasks = set()
 
 
+def validate_settings():
+    if -999999 not in settings.ENABLED_USERS:
+        return
+    if not (settings.CMD_WHITE_LIST or settings.ONLY_SHORTCUT_CMD):
+        raise Exception(
+            "It a public bot. "
+            "Public bot is not safe, dont's use root to run this bot. "
+            "You must add settings `CMD_WHITE_LIST` or `ONLY_SHORTCUT_CMD=True` for a public bot"
+        )
+
 
 def restricted(func):
     @wraps(func)
@@ -67,7 +77,7 @@ def __is_out_all(cmd: str) -> (str, bool):
     param = "oa;"
     if cmd.startswith(param):
         return cmd[len(param) :], True
-    return cmd, True
+    return cmd, False
 
 
 def __do_exec(cmd, update, context, is_script=False, need_filter_cmd=True):
@@ -84,16 +94,12 @@ def __do_exec(cmd, update, context, is_script=False, need_filter_cmd=True):
     if is_out_all:
         max_idx = 999999
 
-    if need_filter_cmd and not __check_cmd_chars(cmd):
-        reply_text("This cmd is illegal.")
-        return
-
+    
     if is_script:
         cmd = os.path.join(settings.SCRIPTS_ROOT_PATH, cmd)
 
     try:
         c = delegator.run(cmd, block=False, timeout=1e6)
-#########
     except FileNotFoundError as e:
         reply_text(f"{e}")
         return
