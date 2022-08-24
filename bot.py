@@ -58,6 +58,12 @@ def start(update, context):
     )
     update.message.reply_text(msg, reply_markup=reply_markup)
 
+def __is_out_all(cmd: str) -> (str, bool):
+    param = "oa;"
+    if cmd.startswith(param):
+        return cmd[len(param) :], True
+    return cmd, False
+
 
 def error(update, context):
     """Log Errors caused by Updates."""
