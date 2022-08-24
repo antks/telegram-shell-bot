@@ -80,8 +80,10 @@ def __do_exec(cmd, update, context, is_script=False, need_filter_cmd=True):
     message = update.message or update.callback_query.message
     logger.debug('exec command "%s", is_script "%s"', cmd, is_script)
 
-    max_idx=999999
-
+    max_idx = 3
+    cmd, is_out_all = __is_out_all(cmd)
+    if is_out_all:
+        max_idx = 999999
     
     if is_script:
         cmd = os.path.join(settings.SCRIPTS_ROOT_PATH, cmd)
