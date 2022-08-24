@@ -140,8 +140,6 @@ def __check_cmd(cmd: str):
     if cmd.startswith("sudo"):
         cmd = cmd[4:].strip()
     cmd = cmd.split(" ")[0]
-    if settings.CMD_WHITE_LIST and cmd not in settings.CMD_WHITE_LIST:
-        return False
     if cmd in settings.CMD_BLACK_LIST:
         return False
     return True
@@ -224,8 +222,7 @@ def do_sudo_login(update, context):
 def shortcut_cb(update, context):
     query = update.callback_query
     cmd = query.data
-    if cmd not in settings.SC_MENU_ITEM_CMDS.keys():
-        update.callback_query.message.reply_text("This cmd is illegal.")
+
     cmd_info = settings.SC_MENU_ITEM_CMDS[cmd]
     is_script = cmd_info[2] if len(cmd_info) >= 3 else False
     __do_exec(cmd, update, context, is_script=is_script, need_filter_cmd=False)
