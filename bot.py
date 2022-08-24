@@ -58,11 +58,6 @@ def start(update, context):
     )
     update.message.reply_text(msg, reply_markup=reply_markup)
 
-def __is_out_all(cmd: str) -> (str, bool):
-    param = "oa;"
-    if cmd.startswith(param):
-        return cmd[len(param) :], True
-    return cmd, False
 
 
 def error(update, context):
@@ -80,9 +75,7 @@ def __do_exec(cmd, update, context, is_script=False, need_filter_cmd=True):
     message = update.message or update.callback_query.message
     logger.debug('exec command "%s", is_script "%s"', cmd, is_script)
 
-    max_idx = 3
-    cmd, is_out_all = __is_out_all(cmd)
-    if is_out_all:
+    
         max_idx = 999999
     
     if is_script:
@@ -91,7 +84,7 @@ def __do_exec(cmd, update, context, is_script=False, need_filter_cmd=True):
     try:
         c = delegator.run(cmd, block=False, timeout=1e6)
     except FileNotFoundError as e:
-        reply_text(f"{e}")
+        reply_text("")
         return
     out = ""
     task = (f"{c.pid}", cmd, c)
@@ -129,7 +122,7 @@ def __do_cd(update, context):
         os.chdir(cmd[3:])
         update.message.reply_text(f"pwd: {os.getcwd()}")
     except FileNotFoundError as e:
-        update.message.reply_text(f"{e}")
+        update.message.reply_text("")
     return True
 
 
