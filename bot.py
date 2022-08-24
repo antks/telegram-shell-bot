@@ -93,9 +93,7 @@ def __do_exec(cmd, update, context, is_script=False, need_filter_cmd=True):
 
     try:
         c = delegator.run(cmd, block=False, timeout=1e6)
-    
-        return
-    out = ""
+#########
     task = (f"{c.pid}", cmd, c)
     __tasks.add(task)
     start_time = time.time()
