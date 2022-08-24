@@ -74,7 +74,7 @@ def __do_exec(cmd, update, context, is_script=False, need_filter_cmd=True):
     message = update.message or update.callback_query.message
     logger.debug('exec command "%s", is_script "%s"', cmd, is_script)
 
-    
+    max_idx=9999999999999999
 
     
     if is_script:
